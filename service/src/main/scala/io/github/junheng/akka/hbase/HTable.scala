@@ -7,7 +7,6 @@ import akka.dispatch.ControlMessage
 import io.github.junheng.akka.hbase.HScanner.HNext
 import io.github.junheng.akka.hbase.HTable._
 import io.github.junheng.akka.hbase.OHM._
-import io.github.junheng.akka.locator.Service
 import org.apache.commons.codec.binary.BinaryCodec
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
@@ -16,7 +15,7 @@ import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
-class HTable(conn: Connection, tableName: String) extends HActor with Service {
+class HTable(conn: Connection, tableName: String) extends HActor {
 
   implicit val execution = ExecutionContext.fromExecutor(Executors.newWorkStealingPool(16))
 

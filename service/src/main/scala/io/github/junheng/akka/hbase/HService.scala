@@ -3,7 +3,6 @@ package io.github.junheng.akka.hbase
 import akka.actor._
 import com.typesafe.config.Config
 import io.github.junheng.akka.hbase.HService._
-import io.github.junheng.akka.locator.ServiceLocator
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
 import org.apache.hadoop.hbase.io.compress.Compression
 import org.apache.hadoop.hbase.util.RegionSplitter.{HexStringSplit, UniformSplit}
@@ -12,7 +11,7 @@ import org.apache.hadoop.hbase.{HBaseConfiguration, HColumnDescriptor, HTableDes
 import scala.collection.JavaConversions._
 import scala.reflect.runtime._
 
-class HService(config: Config) extends HActor {
+class HService(config: Config, propsOfHTable: (Connection, String) => Props) extends HActor {
 
   protected val mirror = universe.runtimeMirror(getClass.getClassLoader)
 
@@ -63,7 +62,7 @@ class HService(config: Config) extends HActor {
           case None =>
             val gotTable = conn.getTable(TableName.valueOf(name))
             gotTable.setWriteBufferSize(1024 * 1024 * 2)
-            context.actorOf(Props(new HTable(conn, name)), name)
+            context.actorOf(propsOfHTable(conn, name), name)
         }
       } else {
         split match {
@@ -71,7 +70,7 @@ class HService(config: Config) extends HActor {
           case "hex" => conn.getAdmin.createTable(createDescriptor(name, columnFamily), hexStringSplit.split(regionCount))
           case _ => conn.getAdmin.createTable(createDescriptor(name, columnFamily))
         }
-        context.actorOf(Props(new HTable(conn, name)), name)
+        context.actorOf(propsOfHTable(conn, name), name)
       }
     table
   }
@@ -103,9 +102,12 @@ class HService(config: Config) extends HActor {
 }
 
 object HService {
-  def start(config: Config)(implicit system: ActorSystem): ActorRef = {
-    ServiceLocator.initialize(config.getString("zookeepers"))
-    system.actorOf(Props(new HService(config)), "hbase")
+  type PropsOfHTable = (Connection, String) => Props
+
+  private val defaultProps: PropsOfHTable = (conn, name) => Props(new HTable(conn, name))
+
+  def start(config: Config, propsOfHTable: PropsOfHTable = defaultProps)(implicit system: ActorSystem): ActorRef = {
+    system.actorOf(Props(new HService(config, propsOfHTable)), "hbase")
   }
 
   case class CreateTableSplit[T: Manifest](name: Array[Byte], columnFamily: Array[Byte], regionCount: Int, split: String)
