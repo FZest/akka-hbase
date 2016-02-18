@@ -9,6 +9,8 @@ lazy val protocol = project
     name := "akka-hbase-protocol",
     version := "0.1-SNAPSHOT",
     libraryDependencies ++= dependencies.akka,
+    libraryDependencies ++= dependencies.reflection,
+    libraryDependencies ++= dependencies.hbase_CDH5,
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-pickling" % "0.10.1" withSources()
     )
@@ -34,7 +36,6 @@ lazy val service = project
     version := "0.1-SNAPSHOT",
     libraryDependencies ++= dependencies.scala,
     libraryDependencies ++= dependencies.akka,
-    libraryDependencies ++= dependencies.reflection,
     libraryDependencies ++= Seq(
       "io.github.junheng.akka" %% "akka-utils" % "0.1-SNAPSHOT" withSources()
     )
