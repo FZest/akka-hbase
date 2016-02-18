@@ -1,7 +1,7 @@
 package io.github.junheng.akka.hbase
 
 import akka.actor.{PoisonPill, Props}
-import io.github.junheng.akka.hbase.HScanner.HNext
+import io.github.junheng.akka.hbase.protocol.HScannerProtocol.HNext
 import io.github.junheng.akka.hbase.protocol.HTableProtocol._
 import org.apache.hadoop.hbase.client.ResultScanner
 
@@ -31,7 +31,4 @@ class HScanner(scanner: ResultScanner, closeAfterNext: Boolean) extends HActor {
 
 object HScanner {
   def props(scanner: ResultScanner, closeAfterNext: Boolean = false) = Props(new HScanner(scanner, closeAfterNext))
-
-  case class HNext(step: Int)
-
 }

@@ -3,10 +3,8 @@ package io.github.junheng.akka.hbase
 import java.util.concurrent.Executors
 
 import akka.actor.ActorRef
-import akka.dispatch.ControlMessage
-import io.github.junheng.akka.hbase.HScanner.HNext
+import io.github.junheng.akka.hbase.protocol.HScannerProtocol.HNext
 import io.github.junheng.akka.hbase.protocol.HTableProtocol._
-import OHM._
 import org.apache.commons.codec.binary.BinaryCodec
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
@@ -25,15 +23,15 @@ class HTable(conn: Connection, tableName: String) extends HActor {
   }
 
   override def receive: Receive = {
-    case HPut(key, entity) => async {
+    case HPut(put) => async {
       (table, receipt) =>
-        val time = cost(table.put(toPut(key, entity)))
+        val time = cost(table.put(put))
         receipt ! HPutted(time)
     }
 
     case HPuts(puts) => async {
       (table, receipt) =>
-        val time = cost(table.put(puts.map(x => toPut(x.key, x.entity))))
+        val time = cost(table.put(puts.map(_.put)))
         receipt ! HPutted(time)
     }
 

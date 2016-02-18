@@ -6,7 +6,7 @@ import org.apache.hadoop.hbase.TableName
 
 import scala.language.implicitConversions
 
-abstract class HActor extends Actor with ActorLogging with BytesTrait{
+abstract class HActor extends Actor with ActorLogging with BytesTrait {
 
   implicit def arrayToTableName(name: Array[Byte]): TableName = TableName.valueOf(name)
 

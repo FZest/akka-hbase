@@ -2,18 +2,12 @@ package io.github.junheng.akka.hbase.protocol
 
 import akka.dispatch.ControlMessage
 import io.github.junheng.akka.hbase.OHM
-import org.apache.hadoop.hbase.client.Result
+import org.apache.hadoop.hbase.client.{Put, Result}
 
 object HTableProtocol {
-  case class HPut(key: Array[Byte], entity: Any) {
-    def entityAs[C] = entity.asInstanceOf[C]
-  }
+  case class HPut(put:Put) extends HBaseComplicateMessage
 
-  case class HPuts(puts: List[HPut])
-
-  case class HPutThenFlush(key: Array[Byte], entity: Any)
-
-  case class HPutThenFlushes(puts: List[HPutThenFlush])
+  case class HPuts(puts: List[HPut]) extends HBaseComplicateMessage
 
   case class HPutted(cost: Long)
 
@@ -31,11 +25,12 @@ object HTableProtocol {
 
   case class HGetBinaries(gets: List[HGetBinaries])
 
-  case class HResult(payload: Result) {
-    def key = payload.getRow
+  case class HResult(result: Result) extends HBaseComplicateMessage {
+    def key = result.getRow
 
-    def entity[T: Manifest] = if (payload.isEmpty) None else Option(OHM.fromResult[T](payload))
+    def entity[T: Manifest] = if (result.isEmpty) None else Option(OHM.fromResult[T](result))
   }
 
-  case class HResults(cost: Long, entities: List[HResult])
+  case class HResults(cost: Long, results: List[HResult]) extends HBaseComplicateMessage
+
 }

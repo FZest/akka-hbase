@@ -21,7 +21,7 @@ object APP extends App {
 
   system.actorOf(Props(new SafeMailboxMonitor(config.getConfig("safe-mailbox-monitor"))), "safe-mailbox-monitor")
 
-  ServiceLocator.initialize("phb01,phb02,phb03", "junheng")
+  ServiceLocator.initialize("phb01,phb02,phb03")
 
   Accessor.start(config.getString("accessor.host"), config.getInt("accessor.port"))
 

@@ -3,6 +3,7 @@ package io.github.junheng.akka.hbase
 import java.nio.ByteBuffer
 
 import akka.event.LoggingAdapter
+import io.github.junheng.akka.hbase.DataType._
 import org.apache.hadoop.hbase.client.{Put, Result}
 import org.apache.hadoop.hbase.util.Bytes
 import org.reflections.Reflections
@@ -14,7 +15,6 @@ import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe._
-import DataType._
 
 
 object OHM {
