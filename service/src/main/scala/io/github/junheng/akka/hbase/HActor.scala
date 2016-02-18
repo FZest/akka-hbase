@@ -1,4 +1,4 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import akka.actor.{Actor, ActorLogging}
 import io.github.junheng.akka.utils.BytesTrait

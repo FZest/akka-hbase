@@ -1,9 +1,9 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import java.nio.ByteBuffer
 
 import akka.event.LoggingAdapter
-import io.github.junheng.akka.hbase.actor.DataType._
+import io.github.junheng.akka.hbase.DataType._
 import io.github.junheng.akka.hbase.ohm.CF
 import org.apache.hadoop.hbase.client.{Put, Result}
 import org.apache.hadoop.hbase.util.Bytes

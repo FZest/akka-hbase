@@ -1,8 +1,8 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import akka.actor.{PoisonPill, Props}
-import io.github.junheng.akka.hbase.actor.HScanner.HNext
-import io.github.junheng.akka.hbase.actor.HTable.{HResult, HResults}
+import io.github.junheng.akka.hbase.HScanner.HNext
+import io.github.junheng.akka.hbase.HTable.{HResult, HResults}
 import org.apache.hadoop.hbase.client.ResultScanner
 
 import scala.language.postfixOps

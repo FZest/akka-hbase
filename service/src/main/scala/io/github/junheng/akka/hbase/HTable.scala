@@ -1,12 +1,12 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import java.util.concurrent.Executors
 
 import akka.actor.ActorRef
 import akka.dispatch.ControlMessage
-import io.github.junheng.akka.hbase.actor.HScanner.HNext
-import io.github.junheng.akka.hbase.actor.HTable._
-import io.github.junheng.akka.hbase.actor.OHM._
+import io.github.junheng.akka.hbase.HScanner.HNext
+import io.github.junheng.akka.hbase.HTable._
+import io.github.junheng.akka.hbase.OHM._
 import io.github.junheng.akka.locator.Service
 import org.apache.commons.codec.binary.BinaryCodec
 import org.apache.hadoop.hbase.TableName

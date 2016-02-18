@@ -1,8 +1,8 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import akka.actor._
 import com.typesafe.config.Config
-import io.github.junheng.akka.hbase.actor.HService._
+import io.github.junheng.akka.hbase.HService._
 import io.github.junheng.akka.locator.ServiceLocator
 import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
 import org.apache.hadoop.hbase.io.compress.Compression

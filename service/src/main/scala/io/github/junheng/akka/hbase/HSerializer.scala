@@ -1,4 +1,4 @@
-package io.github.junheng.akka.hbase.actor
+package io.github.junheng.akka.hbase
 
 import org.apache.hadoop.hbase.client.{Result, Put}
 
