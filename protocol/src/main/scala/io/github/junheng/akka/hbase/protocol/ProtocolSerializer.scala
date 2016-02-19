@@ -132,6 +132,28 @@ class ProtocolSerializer extends SerializerWithStringManifest {
 }
 
 object ProtocolSerializer {
+  def resultToBytes(r: Result): Array[Byte] = {
+    val bos = new ByteArrayOutputStream()
+    val dos = new DataOutputStream(bos)
+    try {
+      ProtocolSerializer.OutSteam(dos).writeResult(r)
+      bos.toByteArray
+    }
+    finally {
+      dos.close()
+      bos.close()
+    }
+  }
+
+  def bytesToResult(bytes: Array[Byte]): Result = {
+    val bis = new ByteArrayInputStream(bytes)
+    val dis = new DataInputStream(bis)
+    try ProtocolSerializer.InSteam(dis).readResult() finally {
+      dis.close()
+      bis.close()
+    }
+  }
+
 
   implicit def cellScannerToList(scanner: CellScanner): List[Cell] = {
     val cells = ArrayBuffer[Cell]()
