@@ -11,6 +11,7 @@ lazy val protocol = project
     libraryDependencies ++= dependencies.scala,
     libraryDependencies ++= dependencies.akka,
     libraryDependencies ++= dependencies.reflection,
+    libraryDependencies ++= dependencies.curator,
     libraryDependencies ++= dependencies.hbase_CDH5
   )
 
