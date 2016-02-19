@@ -4,8 +4,9 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, DataInputStream, Da
 
 import akka.serialization.SerializerWithStringManifest
 import io.github.junheng.akka.hbase.protocol.HTableProtocol.{HPut, HPuts, HResult, HResults}
+import io.github.junheng.akka.hbase.protocol.ProtocolSerializer._
 import org.apache.hadoop.hbase.client.{Put, Result}
-import org.apache.hadoop.hbase.{CellUtil, Cell, CellScanner, KeyValue}
+import org.apache.hadoop.hbase.{Cell, CellScanner, CellUtil, KeyValue}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
@@ -127,6 +128,17 @@ class ProtocolSerializer extends SerializerWithStringManifest {
     (bos, dos)
   }
 
+
+}
+
+object ProtocolSerializer {
+
+  implicit def cellScannerToList(scanner: CellScanner): List[Cell] = {
+    val cells = ArrayBuffer[Cell]()
+    while (scanner.advance()) cells += scanner.current()
+    cells.toList
+  }
+
   implicit class InSteam(steam: DataInputStream) {
 
     def readPuts(): Seq[Put] = {
@@ -195,12 +207,6 @@ class ProtocolSerializer extends SerializerWithStringManifest {
       steam.writeInt(valueArray.length)
       steam.write(valueArray)
     }
-  }
-
-  implicit def cellScannerToList(scanner: CellScanner): List[Cell] = {
-    val cells = ArrayBuffer[Cell]()
-    while (scanner.advance()) cells += scanner.current()
-    cells.toList
   }
 
 }
