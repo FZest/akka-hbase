@@ -24,7 +24,7 @@ lazy val proxy = project
     libraryDependencies ++= dependencies.logs,
     libraryDependencies ++= Seq(
       "io.github.junheng.akka" %% "akka-accessor" % "0.1-SNAPSHOT" withSources(),
-      "io.github.junheng.akka" %% "akka-locator" % "0.1-SNAPSHOT" withSources(),
+      "io.github.junheng.akka" %% "akka-locator" % "0.13-SNAPSHOT" withSources(),
       "io.github.junheng.akka" %% "akka-monitor" % "0.1-SNAPSHOT" withSources()
     )
   )
