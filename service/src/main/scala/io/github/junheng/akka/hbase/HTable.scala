@@ -24,15 +24,11 @@ class HTable(conn: Connection, tableName: String) extends HActor {
 
   override def receive: Receive = {
     case HPut(put) => async {
-      (table, receipt) =>
-        val time = cost(table.put(put))
-        receipt ! HPutted(time)
+      (table, receipt) => table.put(put)
     }
 
     case HPuts(puts) => async {
-      (table, receipt) =>
-        val time = cost(table.put(puts.map(_.put)))
-        receipt ! HPutted(time)
+      (table, receipt) => table.put(puts.map(_.put))
     }
 
     case HGet(key) => async((table, receipt) => receipt ! HResult(table.get(new Get(key))))
