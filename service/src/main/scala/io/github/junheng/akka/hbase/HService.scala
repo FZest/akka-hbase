@@ -1,5 +1,7 @@
 package io.github.junheng.akka.hbase
 
+import java.util.concurrent.ExecutorService
+
 import akka.actor._
 import com.typesafe.config.Config
 import io.github.junheng.akka.hbase.HService._
