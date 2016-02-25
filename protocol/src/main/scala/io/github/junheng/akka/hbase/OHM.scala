@@ -2,7 +2,7 @@ package io.github.junheng.akka.hbase
 
 import java.nio.ByteBuffer
 
-import akka.event.LoggingAdapter
+import akka.event.{LoggingAdapter, NoLogging}
 import io.github.junheng.akka.hbase.DataType._
 import org.apache.hadoop.hbase.client.{Put, Result}
 import org.apache.hadoop.hbase.util.Bytes
@@ -30,7 +30,7 @@ object OHM {
     }
   }
 
-  def registerSchema[T](clazz:Class[T])(implicit log: LoggingAdapter): Schema = {
+  def registerSchema[T](clazz: Class[T])(implicit log: LoggingAdapter): Schema = {
     registerSchema(mirror.classSymbol(clazz))
   }
 
@@ -41,7 +41,8 @@ object OHM {
         try {
           var mappings = mutable.LinkedHashMap[String, Byte]()
           var fields = Map[String, Byte]()
-          symbol.toType.members foreach {
+          val classType = symbol.toType
+          classType.members foreach {
             case constructor: MethodSymbol if constructor.isConstructor =>
               constructor.paramLists.head foreach { cq =>
                 mappings += cq.name.toString -> cq.annotations.head.tree.children.last.productElement(1).toString.toByte
@@ -50,10 +51,10 @@ object OHM {
             case _ => false
           }
           val mappingOfFields: mutable.LinkedHashMap[String, SchemaField] = mappings.map {
-            case (name, code) => name -> SchemaField(Array(code), fields.getOrElse(name, UNKNOWN))
+            case (name, code) => name -> SchemaField(Array(code), fields.getOrElse(name, UNKNOWN), classType.member(TermName(name)).asTerm)
           }
           val family = Array(symbol.annotations.head.tree.children.last.productElement(1).toString.toByte)
-          val schema = Schema(family, mappingOfFields)
+          val schema = Schema(family, classType, mappingOfFields)
           schemas += symbol.fullName -> schema
           log.info(s"schema [${symbol.fullName}] family [${hex(family)}] qualifiers ${mappingOfFields.toList.sortBy(x => hex(x._2.qualifier)).map(x => s"[${x._1} ${hex(x._2.qualifier)} ${hex(x._2.dataType)}]").mkString(" ")}")
           schema
@@ -64,16 +65,14 @@ object OHM {
 
   }
 
-  def toPut(row: Array[Byte], target: Any): Put = {
+  def toPut(row: Array[Byte], target: Any)(implicit log: LoggingAdapter = NoLogging): Put = {
     val put = new Put(row)
-    val _type = mirror.classSymbol(target.getClass).toType
     val reflect = mirror.reflect(target)
     schemas.get(reflect.symbol.fullName) match {
       case Some(schema) =>
         schema.fields.foreach {
           case (name, field) =>
-            val symbol = _type.member(TermName(name)).asTerm
-            val reflectField = reflect.reflectField(symbol)
+            val reflectField = reflect.reflectField(field.symbol)
             val value = reflectField.get match {
               case v: Byte => Bytes.toBytes(v)
               case v: Int => Bytes.toBytes(v)
@@ -115,7 +114,7 @@ object OHM {
             val cm = mirror.reflectClass(_type.typeSymbol.asClass)
             val constructor = cm.reflectConstructor(_type.decl(universe.nme.CONSTRUCTOR).asMethod)
             val constructorParams = schema.fields.map {
-              case (name, SchemaField(qualifier, dataType)) =>
+              case (name, SchemaField(qualifier, dataType, symbol)) =>
                 Option(cf.get(qualifier)) match {
                   case Some(value) =>
                     dataType match {
@@ -211,9 +210,9 @@ object OHM {
 
 case class Field(name: String, value: Any)
 
-case class Schema(family: Array[Byte], fields: mutable.LinkedHashMap[String, SchemaField])
+case class Schema(family: Array[Byte], dataType: Type, fields: mutable.LinkedHashMap[String, SchemaField])
 
-case class SchemaField(qualifier: Array[Byte], dataType: Byte)
+case class SchemaField(qualifier: Array[Byte], dataType: Byte, symbol: TermSymbol)
 
 case class CanNotLoadSchemaWithGivenEntityType(clazz: String, exception: Exception) extends RuntimeException {
   override def getMessage: String = s"can not load $clazz to schema, cause ${exception.getMessage}"

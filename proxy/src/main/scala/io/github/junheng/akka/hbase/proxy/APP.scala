@@ -2,7 +2,7 @@ package io.github.junheng.akka.hbase.proxy
 
 import akka.actor.{ActorSystem, Props}
 import com.typesafe.config.ConfigFactory
-import io.github.junheng.akka.accessor.access.Accessor
+import io.github.junheng.akka.accessor.access.{AccessorAdapter, Accessor}
 import io.github.junheng.akka.hbase.{HService, HTable}
 import io.github.junheng.akka.locator.{LoadMonitor, Service, ServiceLocator}
 import io.github.junheng.akka.monitor.dispatcher.MonitoredForkJoinPool
@@ -25,6 +25,6 @@ object APP extends App {
 
   Accessor.start(config.getString("accessor.host"), config.getInt("accessor.port"))
 
-  HService.start(config.getConfig("hbase"), (conn, name) => Props(new HTable(conn, name) with Service))
+  HService.start(config.getConfig("hbase"), (conn, name) => Props(new HTable(conn, name) with Service with AccessorAdapter))
 
 }
