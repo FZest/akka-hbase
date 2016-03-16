@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 
 import akka.event.{LoggingAdapter, NoLogging}
 import io.github.junheng.akka.hbase.DataType._
+import io.github.junheng.akka.utils._
 import org.apache.hadoop.hbase.client.{Put, Result}
 import org.apache.hadoop.hbase.util.Bytes
 import org.reflections.Reflections
@@ -15,7 +16,6 @@ import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe._
-
 
 object OHM {
   private val mirror = universe.runtimeMirror(OHM.getClass.getClassLoader)
@@ -53,8 +53,10 @@ object OHM {
           val mappingOfFields: mutable.LinkedHashMap[String, SchemaField] = mappings.map {
             case (name, code) => name -> SchemaField(Array(code), fields.getOrElse(name, UNKNOWN), classType.member(TermName(name)).asTerm)
           }
+          val cm = mirror.reflectClass(symbol.asClass)
+          val constructor = cm.reflectConstructor(symbol.toType.decl(universe.nme.CONSTRUCTOR).asMethod)
           val family = Array(symbol.annotations.head.tree.children.last.productElement(1).toString.toByte)
-          val schema = Schema(family, classType, mappingOfFields)
+          val schema = Schema(family, classType, mappingOfFields, constructor)
           schemas += symbol.fullName -> schema
           log.info(s"schema [${symbol.fullName}] family [${hex(family)}] qualifiers ${mappingOfFields.toList.sortBy(x => hex(x._2.qualifier)).map(x => s"[${x._1} ${hex(x._2.qualifier)} ${hex(x._2.dataType)}]").mkString(" ")}")
           schema
@@ -111,8 +113,7 @@ object OHM {
       case Some(schema) =>
         Option(result.getFamilyMap(schema.family)) match {
           case Some(cf) =>
-            val cm = mirror.reflectClass(_type.typeSymbol.asClass)
-            val constructor = cm.reflectConstructor(_type.decl(universe.nme.CONSTRUCTOR).asMethod)
+            val constructor = schema.constructor
             val constructorParams = schema.fields.map {
               case (name, SchemaField(qualifier, dataType, symbol)) =>
                 Option(cf.get(qualifier)) match {
@@ -162,7 +163,6 @@ object OHM {
                     case _ => None
                   }
                 }
-
             }.toList
             constructor(constructorParams: _*).asInstanceOf[T]
           case None =>
@@ -174,6 +174,7 @@ object OHM {
   }
 
   def getDataType(_type: Type) = TYPE_MAPPING.getOrElse(_type, UNKNOWN)
+
 
   val TYPE_MAPPING = Map(
     //basic
@@ -210,7 +211,7 @@ object OHM {
 
 case class Field(name: String, value: Any)
 
-case class Schema(family: Array[Byte], dataType: Type, fields: mutable.LinkedHashMap[String, SchemaField])
+case class Schema(family: Array[Byte], dataType: Type, fields: mutable.LinkedHashMap[String, SchemaField], constructor: MethodMirror)
 
 case class SchemaField(qualifier: Array[Byte], dataType: Byte, symbol: TermSymbol)
 

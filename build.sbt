@@ -9,11 +9,15 @@ version in ThisBuild := "0.12-SNAPSHOT"
 lazy val protocol = project
   .settings(
     name := "akka-hbase-protocol",
+    libraryDependencies ++= Seq(
+      "io.github.junheng.akka" %% "akka-utils" % "0.1-SNAPSHOT" withSources()
+    ),
     libraryDependencies ++= dependencies.scala,
     libraryDependencies ++= dependencies.akka,
     libraryDependencies ++= dependencies.reflection,
     libraryDependencies ++= dependencies.curator,
-    libraryDependencies ++= dependencies.hbase_CDH5
+    libraryDependencies ++= dependencies.hbase_CDH5,
+    libraryDependencies ++= dependencies.test
   )
 
 lazy val proxy = project
@@ -34,9 +38,6 @@ lazy val service = project
   .settings(
     name := "akka-hbase-service",
     libraryDependencies ++= dependencies.scala,
-    libraryDependencies ++= dependencies.akka,
-    libraryDependencies ++= Seq(
-      "io.github.junheng.akka" %% "akka-utils" % "0.1-SNAPSHOT" withSources()
-    )
+    libraryDependencies ++= dependencies.akka
   )
 
