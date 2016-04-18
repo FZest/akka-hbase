@@ -6,6 +6,8 @@ scalaVersion in ThisBuild := "2.11.7"
 
 version in ThisBuild := "0.12-SNAPSHOT"
 
+parallelExecution in ThisBuild := false
+
 lazy val protocol = project
   .settings(
     name := "akka-hbase-protocol",
